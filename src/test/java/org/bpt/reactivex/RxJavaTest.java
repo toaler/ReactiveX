@@ -3,6 +3,7 @@ package org.bpt.reactivex;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigInteger;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,7 +34,19 @@ public class RxJavaTest {
 				throw new RuntimeException("Something went wrong");
 			return e * 2;
 		}).subscribe();
+	}
 
+	@Test
+	public void onError() {
+		final CountDownLatch latch = new CountDownLatch(1);
+		
+		Observable.range(1, 100).map(e -> {
+			if (e == 2)
+				throw new RuntimeException("Something went wrong");
+			return e * 2;
+		}).subscribe(e -> System.out.println(e), err -> latch.countDown());
+		
+		assertThat(latch.getCount()).isEqualTo(0);
 	}
 
 	private void sleep(int millis) {
